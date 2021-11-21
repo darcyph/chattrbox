@@ -1,7 +1,14 @@
 import socket from './ws-client';
-import {UserStore} from './storage';
-import {ChatForm, ChatList, promptForUsername} from './dom';
+import {
+  UserStore
+} from './storage';
+import {
+  ChatForm,
+  ChatList,
+  promptForUsername
+} from './dom';
 
+let moment = require('moment');
 let userStore = new UserStore('x-chattrbox/u');
 
 class ChatApp {
@@ -27,8 +34,13 @@ class ChatApp {
       // WebSockets server
       let message = new ChatMessage(data);
       // then, call this.chatList.drawMessage() with the new message instance
-      this.chatList.drawMessage(message.toObj());
+      if (data.user == this.username) {
+        this.chatList.drawMyMessage(message.toObj())
+      } else {
+        this.chatList.drawMessage(message.toObj());
+      }
     });
+    this.chatList.init();
   }
 }
 

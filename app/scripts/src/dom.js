@@ -1,4 +1,5 @@
 let $ = require('jquery');
+let moment = require('moment');
 
 let md5 = require('crypto-js/md5');
 
@@ -18,6 +19,7 @@ export class ChatForm {
     this.formId = formId;
     this.inputId = inputId;
   }
+
   init(submitCallback) {
     $(this.formId).submit((event) => {
       event.preventDefault();
@@ -37,9 +39,45 @@ export class ChatList {
     this.odd = false;
     this.username = username;
   }
+
   drawMessage(messageData) {
     var $messageRow = $('<li>', {
       class: 'message-row'
+    });
+
+    var $message = $('<p>');
+    $message.append($('<span>', {
+      class: 'message-username',
+      text: messageData.user
+    }));
+
+    $message.append($('<span>', {
+      class: 'timestamp',
+      'data-time': messageData.timestamp,
+      text: moment(messageData.timestamp).fromNow(),
+    }));
+
+    $message.append($('<span>', {
+      class: 'message-message',
+      text: messageData.message
+    }));
+    $messageRow.append($message);
+
+    var $img = $('<img>', {
+      class: 'img-other',
+      src: createGravatarUrl(messageData.user),
+      title: messageData.user
+
+    });
+    $messageRow.append($img);
+
+    $(this.listId).append($messageRow);
+    $messageRow.get(0).scrollIntoView();
+  }
+
+  drawMyMessage(messageData) {
+    var $messageRow = $('<li>', {
+      class: 'message-row me'
     });
     var $message = $('<p>');
     $message.append($('<span>', {
@@ -48,7 +86,8 @@ export class ChatList {
     }));
     $message.append($('<span>', {
       class: 'timestamp',
-      'data-time': messageData.timestamp
+      'data-time': messageData.timestamp,
+      text: moment(messageData.timestamp).fromNow()
     }));
     $message.append($('<span>', {
       class: 'message-message',
@@ -64,5 +103,16 @@ export class ChatList {
 
     $(this.listId).append($messageRow);
     $messageRow.get(0).scrollIntoView();
+  }
+
+  init() {
+    this.timer = setInterval(() => {
+      $('[data-time]').each((idx, element) => {
+        let $element = $(element);
+        let timestamp = new Date().setTime($element.attr('data-time'));
+        let ago = moment(timestamp).fromNow();
+        $element.html(ago);
+      });
+    }, 1000);
   }
 }
